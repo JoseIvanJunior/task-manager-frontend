@@ -1,0 +1,95 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Gerenciador de Tarefas</h2>
+    <button mat-raised-button color="primary" [routerLink]="['/tasks/new']">
+      <mat-icon>add</mat-icon> Nova Tarefa
+    </button>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <!-- Filtros -->
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Responsável</mat-label>
+            <input matInput [(ngModel)]="filters.responsible">
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Prioridade</mat-label>
+            <mat-select [(ngModel)]="filters.priority">
+              <mat-option [value]="null">Todas</mat-option>
+              <mat-option *ngFor="let p of priorities" [value]="p">{{ p }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Situação</mat-label>
+            <mat-select [(ngModel)]="filters.status">
+              <mat-option [value]="null">Todas</mat-option>
+              <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button mat-button (click)="clearFilters()">Limpar</button>
+        </div>
+      </div>
+
+      <!-- Tabela de Tarefas -->
+      <table mat-table [dataSource]="filteredTasks" class="mat-elevation-z1 w-100">
+
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Título </th>
+          <td mat-cell *matCellDef="let task"> {{ task.title }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="responsible">
+          <th mat-header-cell *matHeaderCellDef> Responsável </th>
+          <td mat-cell *matCellDef="let task"> {{ task.responsible }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="priority">
+          <th mat-header-cell *matHeaderCellDef> Prioridade </th>
+          <td mat-cell *matCellDef="let task">
+            <span [class]="'priority-badge ' + task.priority.toLowerCase()">
+              {{ task.priority }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="deadline">
+          <th mat-header-cell *matHeaderCellDef> Deadline </th>
+          <td mat-cell *matCellDef="let task"> {{ task.deadline | date:'dd/MM/yyyy' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Situação </th>
+          <td mat-cell *matCellDef="let task"> {{ task.status }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Ações </th>
+          <td mat-cell *matCellDef="let task">
+            <button mat-icon-button color="primary" [routerLink]="['/tasks', task.id]">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteTask(task.id!)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" *ngIf="task.status !== 'Concluída'"
+                    (click)="completeTask(task.id!)">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

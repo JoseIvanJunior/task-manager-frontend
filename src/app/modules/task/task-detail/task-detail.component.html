@@ -1,0 +1,118 @@
+<div class="detail-container">
+  <div class="header-actions">
+    <button mat-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon> Voltar para Lista
+    </button>
+
+    <button mat-raised-button color="primary" (click)="editTask()" class="edit-button">
+      <mat-icon>edit</mat-icon> Editar Tarefa
+    </button>
+  </div>
+
+  <mat-card class="detail-card" *ngIf="task">
+    <mat-card-header>
+      <div class="task-header">
+        <div class="task-title-section">
+          <h1 class="task-title">{{ task.title }}</h1>
+          <div class="task-meta">
+            <span class="task-id">ID: {{ task.id }}</span>
+            <span class="task-date">
+              <mat-icon>event</mat-icon>
+              Criada em: {{ task.createdAt | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="task-status-badge">
+          <mat-chip [class]="'status-' + task.status.toLowerCase()">
+            <mat-icon>{{ task.status === 'COMPLETED' ? 'check_circle' : 'pending' }}</mat-icon>
+            {{ getStatusDisplay(task.status) }}
+          </mat-chip>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="task-content">
+        <!-- Descrição -->
+        <div class="section">
+          <h3 class="section-title">
+            <mat-icon>description</mat-icon>
+            Descrição
+          </h3>
+          <p class="section-content">{{ task.description || 'Sem descrição' }}</p>
+        </div>
+
+        <!-- Informações Principais -->
+        <div class="info-grid">
+          <div class="info-item">
+            <mat-icon class="info-icon">person</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Responsável</span>
+              <span class="info-value">{{ task.responsible }}</span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <mat-icon class="info-icon">priority_high</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Prioridade</span>
+              <span class="info-value priority-value" [class]="'priority-' + task.priority.toLowerCase()">
+                {{ getPriorityDisplay(task.priority) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <mat-icon class="info-icon">event</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Prazo (Deadline)</span>
+              <span class="info-value deadline-value" [class]="{'deadline-passed': isDeadlinePassed(task.deadline)}">
+                {{ task.deadline | date:'dd/MM/yyyy' }}
+                <span *ngIf="isDeadlinePassed(task.deadline)" class="deadline-warning">
+                  (Atrasada)
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <mat-icon class="info-icon">update</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Última Atualização</span>
+              <span class="info-value">{{ task.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ações Rápidas -->
+        <div class="quick-actions" *ngIf="task.status !== 'COMPLETED'">
+          <h3 class="section-title">
+            <mat-icon>play_arrow</mat-icon>
+            Ações Rápidas
+          </h3>
+          <div class="actions-grid">
+            <button mat-raised-button color="accent" class="action-button">
+              <mat-icon>check_circle</mat-icon>
+              Marcar como Concluída
+            </button>
+            <button mat-button class="action-button">
+              <mat-icon>schedule</mat-icon>
+              Adiar Prazo
+            </button>
+            <button mat-button class="action-button" color="warn">
+              <mat-icon>delete</mat-icon>
+              Excluir Tarefa
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div *ngIf="!task" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Carregando detalhes da tarefa...</p>
+  </div>
+</div>

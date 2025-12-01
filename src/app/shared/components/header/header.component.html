@@ -1,0 +1,19 @@
+<mat-toolbar color="primary">
+  <span routerLink="/tasks" style="cursor: pointer; margin-right: 20px;">
+    📋 Task Manager
+  </span>
+
+  <span class="spacer"></span>
+
+  <div *ngIf="authService.isLoggedIn()">
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Sair</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>
