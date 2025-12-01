@@ -113,7 +113,7 @@ Crie um arquivo environments/environment.ts:
 typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000' // URL do seu backend
+  apiUrl: 'http://localhost:8081' // URL do seu backend
 };
 📱 Telas da Aplicação
 Login
