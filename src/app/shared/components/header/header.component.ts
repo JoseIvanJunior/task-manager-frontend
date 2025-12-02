@@ -1,10 +1,13 @@
+// src/app/shared/components/header/header.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
+import { Observable } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -12,8 +15,9 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
+    RouterLink,
     MatToolbarModule,
+    MatDividerModule,
     MatButtonModule,
     MatIconModule,
     MatMenuModule
@@ -22,11 +26,24 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
-  constructor(public authService: AuthService) {}
+  currentUser$: Observable<string | null>;
+
+  constructor(
+    public authService: AuthService,
+    private router: Router
+  ) {
+    this.currentUser$ = this.authService.currentUser$;
+  }
 
   logout(): void {
     this.authService.logout();
-    // Recarregar a página para limpar estado
-    window.location.href = '/login';
+  }
+
+  goToTasks(): void {
+    this.router.navigate(['/tasks']);
+  }
+
+  goToProfile(): void {
+    this.router.navigate(['/profile']);
   }
 }

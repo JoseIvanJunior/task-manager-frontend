@@ -1,112 +1,113 @@
-import { Component, OnInit } from '@angular/core';
+// src/app/modules/task/task-form/task-form.component.ts
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-
-import { MatCardModule } from '@angular/material/card';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-
-import { TaskService } from '../../../core/services/task.service';
-import { Task, Priority, Status, PriorityDisplay, StatusDisplay } from '../../../core/models/task.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { Task, TaskRequest, TaskPriority, TaskStatus } from './../../../core/models/task.model';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    MatCardModule,
+    ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule,
     MatDatepickerModule,
-    MatNativeDateModule,
-    MatIconModule
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatCardModule
   ],
   templateUrl: './task-form.component.html',
-  styleUrls: ['./task-form.component.scss']
+  styleUrls: ['./task-form.component.scss']  // Referência ao SCSS separado
 })
 export class TaskFormComponent implements OnInit {
-  isEditMode = false;
-  taskId?: number;
-  task: Task = {
-    title: '',
-    description: '',
-    responsible: '',
-    priority: Priority.MEDIUM,
-    deadline: new Date().toISOString().split('T')[0],
-    status: Status.IN_PROGRESS
-  };
+  @Input() task?: Task;
+  @Input() isEditMode = false;
+  @Input() isLoading = false;
+  @Output() formSubmit = new EventEmitter<TaskRequest>();
+  @Output() cancel = new EventEmitter<void>();
 
-  minDate = new Date();
-  priorities = Object.values(Priority);
-  statuses = Object.values(Status);
+  taskForm!: FormGroup;
+  priorities = Object.values(TaskPriority);
+  statuses = Object.values(TaskStatus);
+  today = new Date().toISOString().split('T')[0];
 
-  constructor(
-    private taskService: TaskService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+  constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.params['id'];
-    if (id) {
-      this.isEditMode = true;
-      this.taskId = +id;
-      this.loadTask(this.taskId);
+    this.initForm();
+
+    if (this.task && this.isEditMode) {
+      this.patchFormValues();
     }
   }
 
-  loadTask(id: number): void {
-    this.taskService.getTaskById(id).subscribe({
-      next: (task) => {
-        this.task = task;
-      },
-      error: (error) => {
-        console.error('Erro ao carregar tarefa:', error);
+  private initForm(): void {
+    this.taskForm = this.fb.group({
+      title: ['', [Validators.required, Validators.maxLength(100)]],
+      description: ['', [Validators.maxLength(500)]],
+      responsible: ['', [Validators.required, Validators.maxLength(50)]],
+      priority: ['MEDIUM', [Validators.required]],
+      status: ['TODO', [Validators.required]],
+      deadline: ['']
+    });
+  }
+
+  private patchFormValues(): void {
+    this.taskForm.patchValue({
+      title: this.task?.title || '',
+      description: this.task?.description || '',
+      responsible: this.task?.responsible || '',
+      priority: this.task?.priority || 'MEDIUM',
+      status: this.task?.status || 'TODO',
+      deadline: this.task?.deadline || ''
+    });
+  }
+
+  onSubmit(): void {
+    if (this.taskForm.valid) {
+      const formValue = this.taskForm.value;
+      const taskRequest: TaskRequest = {
+        title: formValue.title,
+        description: formValue.description || undefined,
+        responsible: formValue.responsible,
+        priority: formValue.priority,
+        status: formValue.status,
+        deadline: formValue.deadline || undefined
+      };
+      this.formSubmit.emit(taskRequest);
+    } else {
+      this.markFormGroupTouched(this.taskForm);
+    }
+  }
+
+  onCancel(): void {
+    this.cancel.emit();
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
       }
     });
   }
 
-  saveTask(): void {
-    if (this.isEditMode && this.taskId) {
-      this.taskService.updateTask(this.taskId, this.task).subscribe({
-        next: () => {
-          this.router.navigate(['/tasks']);
-        },
-        error: (error) => console.error('Erro ao atualizar:', error)
-      });
-    } else {
-      this.taskService.createTask(this.task).subscribe({
-        next: () => {
-          this.router.navigate(['/tasks']);
-        },
-        error: (error) => console.error('Erro ao criar:', error)
-      });
-    }
-  }
-
-  cancel(): void {
-    this.router.navigate(['/tasks']);
-  }
-
-  voltarParaLista() {
-    this.router.navigate(['/tasks']);
-  }
-
-  // Métodos para exibição
-  getPriorityDisplay(priority: string): string {
-    return PriorityDisplay[priority as keyof typeof PriorityDisplay] || priority;
-  }
-
-  getStatusDisplay(status: string): string {
-    return StatusDisplay[status as keyof typeof StatusDisplay] || status;
-  }
+  get title() { return this.taskForm.get('title'); }
+  get description() { return this.taskForm.get('description'); }
+  get responsible() { return this.taskForm.get('responsible'); }
+  get priority() { return this.taskForm.get('priority'); }
+  get status() { return this.taskForm.get('status'); }
+  get deadline() { return this.taskForm.get('deadline'); }
 }

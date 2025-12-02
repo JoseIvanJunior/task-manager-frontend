@@ -1,3 +1,4 @@
+// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -8,30 +9,27 @@ export const routes: Routes = [
       .then(m => m.LoginComponent)
   },
   {
+    path: 'register',
+    loadComponent: () => import('./modules/auth/register/register.component')
+      .then(m => m.RegisterComponent)
+  },
+  {
     path: 'tasks',
-    canActivate: [authGuard],
-    children: [
-      {
-        path: '',
-        loadComponent: () => import('./modules/task/task-list/task-list.component')
-          .then(m => m.TaskListComponent)
-      },
-      {
-        path: 'new',
-        loadComponent: () => import('./modules/task/task-form/task-form.component')
-          .then(m => m.TaskFormComponent)
-      },
-      {
-        path: 'edit/:id',
-        loadComponent: () => import('./modules/task/task-form/task-form.component')
-          .then(m => m.TaskFormComponent)
-      },
-      {
-        path: ':id',
-        loadComponent: () => import('./modules/task/task-detail/task-detail.component')
-          .then(m => m.TaskDetailComponent)
-      }
-    ]
+    loadComponent: () => import('./modules/task/task-list/task-list.component')
+      .then(m => m.TaskListComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'tasks/new',
+    loadComponent: () => import('./modules/task/task-form/task-form.component')
+      .then(m => m.TaskFormComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'tasks/edit/:id',
+    loadComponent: () => import('./modules/task/task-form/task-form.component')
+      .then(m => m.TaskFormComponent),
+    canActivate: [authGuard]
   },
   {
     path: '',

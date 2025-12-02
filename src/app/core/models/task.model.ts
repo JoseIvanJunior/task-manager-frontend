@@ -1,40 +1,55 @@
-export enum Priority {
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW'
-}
+// src/app/core/models/task.model.ts
 
-export enum Status {
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED'
-}
-
+// Interface principal da tarefa
 export interface Task {
   id?: number;
   title: string;
-  description: string;
+  description?: string;
   responsible: string;
-  priority: Priority;
-  deadline: string;
-  status: Status;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  status: 'TODO' | 'IN_PROGRESS' | 'DONE';
+  deadline?: string;
+  userId?: number;
+  username?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export const PriorityDisplay: Record<Priority, string> = {
-  [Priority.HIGH]: 'Alta',
-  [Priority.MEDIUM]: 'Média',
-  [Priority.LOW]: 'Baixa'
-};
+// Request para criar/atualizar tarefa
+export interface TaskRequest {
+  title: string;
+  description?: string;
+  responsible: string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
+  deadline?: string;
+  userId?: number;
+}
 
-export const StatusDisplay: Record<Status, string> = {
-  [Status.IN_PROGRESS]: 'Em andamento',
-  [Status.COMPLETED]: 'Concluída'
-};
+// Filtro para tarefas
+export interface TaskFilter {
+  status?: string;
+  priority?: string;
+  responsible?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
-// Mapeamentos para cores (usado no CSS)
-export const PriorityColor: Record<Priority, string> = {
-  [Priority.HIGH]: 'alta',
-  [Priority.MEDIUM]: 'media',
-  [Priority.LOW]: 'baixa'
-};
+// Enums separados para facilitar o uso
+export enum TaskPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH'
+}
+
+export enum TaskStatus {
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE'
+}
+
+// Função auxiliar para formatar datas
+export function formatDate(dateString?: string): string {
+  if (!dateString) return 'Não definido';
+  return new Date(dateString).toLocaleDateString('pt-BR');
+}

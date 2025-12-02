@@ -1,7 +1,13 @@
+// src/styles.scss
+
+// Import do tema do Material - IMPORTANTE: usar o tema correto
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+// Import das fontes
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
+/* ====== RESET COMPLETO ====== */
 * {
   margin: 0;
   padding: 0;
@@ -10,18 +16,68 @@
 
 html, body {
   height: 100%;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   font-family: 'Roboto', sans-serif;
-  background-color: #f5f7fa;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: #333;
   line-height: 1.6;
-  overflow: hidden
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+}
+
+/* ====== REMOVE TODOS OS OVERLAYS ESCUROS ====== */
+body::before,
+body::after {
+  display: none !important;
+}
+
+.cdk-overlay-backdrop {
+  background-color: transparent !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.cdk-overlay-container {
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.cdk-overlay-pane {
+  pointer-events: auto;
+}
+
+.mat-drawer-backdrop {
+  background-color: transparent !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Remove qualquer modal/dialog que possa estar bloqueando */
+.mat-dialog-container {
+  position: relative;
+  z-index: 1001;
+}
+
+/* Garante que o conteúdo principal esteja sempre visível */
+.app-root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -31,4 +87,22 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Remove outlines padrão */
+*:focus {
+  outline: 2px solid #3f51b5;
+  outline-offset: 2px;
+}
+
+/* Fix para inputs do Material */
+.mat-form-field {
+  width: 100%;
+}
+
+/* Remove qualquer sombra que possa estar causando o efeito escuro */
+.mat-elevation-z8,
+.mat-elevation-z6,
+.mat-elevation-z4 {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
 }

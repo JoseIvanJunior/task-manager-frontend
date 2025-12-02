@@ -1,32 +1,95 @@
+<!-- src/app/features/auth/login/login.component.html -->
 <div class="login-container">
   <mat-card class="login-card">
     <mat-card-header>
       <mat-card-title>Login</mat-card-title>
-      <mat-card-subtitle>Para testes, use qualquer usuário/senha</mat-card-subtitle>
+      <mat-card-subtitle>
+        Acesse sua conta para gerenciar suas tarefas
+        <br>
+        <small *ngIf="!isLoading">Para desenvolvimento: "usuario_teste" / "senha123"</small>
+      </mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
-      <form (ngSubmit)="login()">
-        <mat-form-field appearance="outline" class="full-width">
+      <form (ngSubmit)="login()" (keydown)="onKeyPress($event)">
+        <!-- Usuário -->
+        <mat-form-field appearance="outline" class="form-field">
           <mat-label>Usuário</mat-label>
-          <input matInput [(ngModel)]="username" name="username" required>
+          <input
+            matInput
+            [(ngModel)]="username"
+            name="username"
+            required
+            [disabled]="isLoading"
+            placeholder="Digite seu usuário"
+            autocomplete="username">
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-error *ngIf="!username.trim()">
+            Usuário é obrigatório
+          </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <!-- Senha -->
+        <mat-form-field appearance="outline" class="form-field">
           <mat-label>Senha</mat-label>
-          <input matInput type="password" [(ngModel)]="password" name="password" required>
+          <input
+            matInput
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            required
+            [disabled]="isLoading"
+            placeholder="Digite sua senha"
+            autocomplete="current-password">
+          <mat-icon matSuffix>lock</mat-icon>
+          <mat-error *ngIf="!password.trim()">
+            Senha é obrigatória
+          </mat-error>
         </mat-form-field>
 
-        <button mat-raised-button color="primary" type="submit" class="full-width">
-          Entrar
+        <!-- Botão de Login -->
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="submit-button"
+          [disabled]="isLoading || !username.trim() || !password.trim()">
+          <span *ngIf="isLoading">
+            <mat-spinner diameter="20" class="spinner"></mat-spinner>
+            Entrando...
+          </span>
+          <span *ngIf="!isLoading">
+            <mat-icon>login</mat-icon>
+            Entrar
+          </span>
         </button>
-      </form>
 
-      <div class="test-login mt-3">
-        <button mat-button (click)="loginAsTestUser()">
+        <!-- Mensagem de erro -->
+        <div *ngIf="errorMessage" class="error-message">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMessage }}
+        </div>
+
+        <!-- Botão de teste -->
+        <button
+          mat-stroked-button
+          color="accent"
+          type="button"
+          class="test-user-button"
+          (click)="loginAsTestUser()"
+          [disabled]="isLoading">
+          <mat-icon>play_arrow</mat-icon>
           Entrar como Usuário de Teste
         </button>
-      </div>
+
+        <!-- Link para registro -->
+        <div class="register-link">
+          <p>
+            Não tem uma conta?
+            <a routerLink="/register" mat-button color="primary">Registre-se</a>
+          </p>
+        </div>
+      </form>
     </mat-card-content>
   </mat-card>
 </div>

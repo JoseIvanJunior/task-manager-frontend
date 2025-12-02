@@ -1,132 +1,90 @@
 <!-- src/app/modules/task/task-form/task-form.component.html -->
-<div class="form-container">
-  <div class="header-actions">
-    <button mat-button (click)="voltarParaLista()" class="back-button">
-     <mat-icon>arrow_back</mat-icon>
-      Voltar para Lista
-    </button>
-  </div>
+<div class="task-form-container">
+  <h2>{{ isEditMode ? 'Editar Tarefa' : 'Nova Tarefa' }}</h2>
 
-  <mat-card class="form-card">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon class="form-icon">{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
-        {{ isEditMode ? 'Editar Tarefa' : 'Nova Tarefa' }}
-      </mat-card-title>
-      <mat-card-subtitle>
-        {{ isEditMode ? 'Atualize os dados da tarefa' : 'Preencha os dados para criar uma nova tarefa' }}
-      </mat-card-subtitle>
-    </mat-card-header>
+  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+    <mat-card>
+      <mat-card-content>
+        <!-- Título -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Título</mat-label>
+          <input matInput formControlName="title" placeholder="Digite o título da tarefa">
+          <mat-icon matSuffix>title</mat-icon>
+          <mat-error *ngIf="title?.invalid && title?.touched">
+            <span *ngIf="title?.errors?.['required']">Título é obrigatório</span>
+            <span *ngIf="title?.errors?.['maxlength']">Máximo 100 caracteres</span>
+          </mat-error>
+        </mat-form-field>
 
-    <mat-card-content>
-      <form (ngSubmit)="saveTask()" #taskForm="ngForm">
-        <div class="form-grid">
-          <!-- Título -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Título da Tarefa</mat-label>
-            <input matInput
-                   [(ngModel)]="task.title"
-                   name="title"
-                   required
-                   placeholder="Ex: Implementar feature X">
-            <mat-icon matSuffix>title</mat-icon>
-            <mat-hint>Dê um título claro para a tarefa</mat-hint>
-            <mat-error *ngIf="taskForm.controls['title']?.invalid">
-              Título é obrigatório
+        <!-- Descrição -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descrição</mat-label>
+          <textarea matInput formControlName="description" placeholder="Digite a descrição da tarefa" rows="3"></textarea>
+          <mat-error *ngIf="description?.invalid && description?.touched">
+            <span *ngIf="description?.errors?.['maxlength']">Máximo 500 caracteres</span>
+          </mat-error>
+        </mat-form-field>
+
+        <div class="form-row">
+          <!-- Responsável -->
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Responsável</mat-label>
+            <input matInput formControlName="responsible" placeholder="Nome do responsável">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="responsible?.invalid && responsible?.touched">
+              <span *ngIf="responsible?.errors?.['required']">Responsável é obrigatório</span>
+              <span *ngIf="responsible?.errors?.['maxlength']">Máximo 50 caracteres</span>
             </mat-error>
           </mat-form-field>
 
-          <!-- Descrição -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Descrição</mat-label>
-            <textarea matInput
-                     [(ngModel)]="task.description"
-                     name="description"
-                     rows="4"
-                     placeholder="Descreva detalhadamente a tarefa..."></textarea>
-            <mat-icon matSuffix>description</mat-icon>
-            <mat-hint>Detalhe o que precisa ser feito</mat-hint>
+          <!-- Prioridade -->
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Prioridade</mat-label>
+            <mat-select formControlName="priority">
+              <mat-option *ngFor="let priority of priorities" [value]="priority">
+                {{ priority }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="priority?.invalid && priority?.touched">
+              Prioridade é obrigatória
+            </mat-error>
           </mat-form-field>
-
-          <div class="form-row">
-            <!-- Responsável -->
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Responsável</mat-label>
-              <input matInput
-                     [(ngModel)]="task.responsible"
-                     name="responsible"
-                     required
-                     placeholder="Nome do responsável">
-              <mat-icon matSuffix>person</mat-icon>
-              <mat-error *ngIf="taskForm.controls['responsible']?.invalid">
-                Responsável é obrigatório
-              </mat-error>
-            </mat-form-field>
-
-            <!-- Prioridade -->
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Prioridade</mat-label>
-              <mat-select [(ngModel)]="task.priority" name="priority" required>
-                <mat-option *ngFor="let p of priorities" [value]="p">
-                  <span class="priority-option">
-                    <mat-icon [class]="'priority-' + p.toLowerCase()">flag</mat-icon>
-                    {{ getPriorityDisplay(p) }}
-                  </span>
-                </mat-option>
-              </mat-select>
-              <mat-icon matSuffix>priority_high</mat-icon>
-            </mat-form-field>
-          </div>
-
-          <div class="form-row">
-            <!-- Deadline -->
-            <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Prazo (Deadline)</mat-label>
-            <input matInput
-                  [matDatepicker]="picker"
-                  [(ngModel)]="task.deadline"
-                  name="deadline"
-                  [min]="minDate"
-                  placeholder="Selecione uma data">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <!-- Removi o mat-icon duplicado, o mat-datepicker-toggle já tem um ícone -->
-            <mat-hint>Data limite para conclusão</mat-hint>
-          </mat-form-field>
-
-            <!-- Status (apenas em modo edição) -->
-            <mat-form-field *ngIf="isEditMode" appearance="outline" class="form-field">
-              <mat-label>Status</mat-label>
-              <mat-select [(ngModel)]="task.status" name="status">
-                <mat-option *ngFor="let s of statuses" [value]="s">
-                  <span class="status-option">
-                    <mat-icon [class]="'status-' + s.toLowerCase()">
-                      {{ s === 'COMPLETED' ? 'check_circle' : 'pending' }}
-                    </mat-icon>
-                    {{ getStatusDisplay(s) }}
-                  </span>
-                </mat-option>
-              </mat-select>
-              <mat-icon matSuffix>update</mat-icon>
-            </mat-form-field>
-          </div>
         </div>
 
-        <div class="form-actions">
-          <button mat-button type="button" (click)="cancel()" class="cancel-button">
-            <mat-icon>cancel</mat-icon>
-            Cancelar
-          </button>
-          <button mat-raised-button
-                  color="primary"
-                  type="submit"
-                  [disabled]="!taskForm.valid"
-                  class="submit-button">
-            <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
-            {{ isEditMode ? 'Atualizar Tarefa' : 'Criar Tarefa' }}
-          </button>
+        <div class="form-row">
+          <!-- Status -->
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let status of statuses" [value]="status">
+                {{ status }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="status?.invalid && status?.touched">
+              Status é obrigatório
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Prazo -->
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Prazo</mat-label>
+            <input matInput formControlName="deadline" type="date" [min]="today">
+            <mat-icon matSuffix>calendar_today</mat-icon>
+          </mat-form-field>
         </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading">
+          Cancelar
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="taskForm.invalid || isLoading">
+          <span *ngIf="!isLoading">
+            {{ isEditMode ? 'Atualizar' : 'Criar' }}
+          </span>
+          <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
 </div>

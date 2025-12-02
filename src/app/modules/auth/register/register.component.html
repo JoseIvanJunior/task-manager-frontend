@@ -1,0 +1,116 @@
+<!-- src/app/modules/auth/register/register.component.html -->
+<div class="register-container">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>Criar Conta</mat-card-title>
+      <mat-card-subtitle>
+        Registre-se para começar a gerenciar suas tarefas
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form (ngSubmit)="register()" (keydown)="onKeyPress($event)">
+        <!-- Usuário -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Usuário</mat-label>
+          <input
+            matInput
+            [(ngModel)]="username"
+            name="username"
+            required
+            [disabled]="isLoading"
+            placeholder="Digite um nome de usuário"
+            minlength="3"
+            maxlength="20"
+            autocomplete="username">
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-hint>Mínimo 3 caracteres</mat-hint>
+          <mat-error *ngIf="username && username.length < 3">
+            Usuário muito curto
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Senha -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Senha</mat-label>
+          <input
+            matInput
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            required
+            [disabled]="isLoading"
+            placeholder="Digite uma senha"
+            minlength="6"
+            autocomplete="new-password">
+          <mat-icon matSuffix>lock</mat-icon>
+          <mat-hint>Mínimo 6 caracteres</mat-hint>
+          <mat-error *ngIf="password && password.length < 6">
+            Senha muito curta
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Confirmar Senha -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Confirmar Senha</mat-label>
+          <input
+            matInput
+            type="password"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            required
+            [disabled]="isLoading"
+            placeholder="Confirme sua senha"
+            autocomplete="new-password">
+          <mat-icon matSuffix>lock</mat-icon>
+          <mat-error *ngIf="confirmPassword && password !== confirmPassword">
+            As senhas não coincidem
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Botão de Cadastro -->
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="submit-button"
+          [disabled]="isLoading || !username || !password || !confirmPassword || password !== confirmPassword">
+          <span *ngIf="isLoading">
+            <mat-spinner diameter="20" class="spinner"></mat-spinner>
+            Cadastrando...
+          </span>
+          <span *ngIf="!isLoading">
+            <mat-icon>person_add</mat-icon>
+            Cadastrar
+          </span>
+        </button>
+
+        <!-- Mensagem de erro -->
+        <div *ngIf="errorMessage" class="error-message">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMessage }}
+        </div>
+
+        <!-- Botão de teste -->
+        <button
+          mat-stroked-button
+          color="accent"
+          type="button"
+          class="test-user-button"
+          (click)="registerAsTestUser()"
+          [disabled]="isLoading">
+          <mat-icon>play_arrow</mat-icon>
+          Criar Usuário de Teste
+        </button>
+
+        <!-- Link para login -->
+        <div class="login-link">
+          <p>
+            Já tem uma conta?
+            <a routerLink="/login" mat-button color="primary">Faça login</a>
+          </p>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

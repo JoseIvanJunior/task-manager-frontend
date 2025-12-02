@@ -1,89 +1,172 @@
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Gerenciador de Tarefas</h2>
-    <button mat-raised-button color="primary" [routerLink]="['/tasks/new']">
-      <mat-icon>add</mat-icon> Nova Tarefa
-    </button>
+<!-- src/app/modules/task/task-list/task-list.component.html -->
+<div class="task-list-container">
+  <div class="header">
+    <h1>Gerenciamento de Tarefas</h1>
+    <div class="actions">
+      <button mat-raised-button color="primary" [routerLink]="['/tasks/new']">
+        <mat-icon>add</mat-icon>
+        Nova Tarefa
+      </button>
+      <button mat-button (click)="showFilters = !showFilters">
+        <mat-icon>filter_list</mat-icon>
+        Filtrar
+      </button>
+      <button mat-button (click)="loadUpcomingTasks()">
+        <mat-icon>event_upcoming</mat-icon>
+        Próximas
+      </button>
+      <button mat-button (click)="loadOverdueTasks()">
+        <mat-icon>event_busy</mat-icon>
+        Atrasadas
+      </button>
+    </div>
   </div>
 
+  <!-- Filtros -->
+  <div class="filters-container" *ngIf="showFilters">
+    <mat-card>
+      <mat-card-content>
+        <div class="filter-fields">
+          <mat-form-field>
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="filter.status">
+              <mat-option value="">Todos</mat-option>
+              <mat-option *ngFor="let status of statuses" [value]="status">
+                {{ status }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Prioridade</mat-label>
+            <mat-select [(ngModel)]="filter.priority">
+              <mat-option value="">Todas</mat-option>
+              <mat-option *ngFor="let priority of priorities" [value]="priority">
+                {{ priority }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Responsável</mat-label>
+            <input matInput [(ngModel)]="filter.responsible" placeholder="Nome do responsável">
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Data Inicial</mat-label>
+            <input matInput type="date" [(ngModel)]="filter.startDate">
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Data Final</mat-label>
+            <input matInput type="date" [(ngModel)]="filter.endDate">
+          </mat-form-field>
+        </div>
+
+        <div class="filter-actions">
+          <button mat-button (click)="clearFilters()">
+            Limpar
+          </button>
+          <button mat-raised-button color="primary" (click)="applyFilters()">
+            Aplicar Filtros
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Tabela de Tarefas -->
   <mat-card>
     <mat-card-content>
-      <!-- Filtros -->
-      <div class="row mb-3">
-        <div class="col-md-3">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Responsável</mat-label>
-            <input matInput [(ngModel)]="filters.responsible">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Prioridade</mat-label>
-            <mat-select [(ngModel)]="filters.priority">
-              <mat-option [value]="null">Todas</mat-option>
-              <mat-option *ngFor="let p of priorities" [value]="p">{{ p }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        <div class="col-md-3">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Situação</mat-label>
-            <mat-select [(ngModel)]="filters.status">
-              <mat-option [value]="null">Todas</mat-option>
-              <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-          <button mat-button (click)="clearFilters()">Limpar</button>
-        </div>
+      <div class="loading-spinner" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Carregando tarefas...</p>
       </div>
 
-      <!-- Tabela de Tarefas -->
-      <table mat-table [dataSource]="filteredTasks" class="mat-elevation-z1 w-100">
+      <div class="no-tasks" *ngIf="!isLoading && tasks.length === 0">
+        <mat-icon>task_alt</mat-icon>
+        <h3>Nenhuma tarefa encontrada</h3>
+        <p>Crie sua primeira tarefa clicando no botão "Nova Tarefa"</p>
+      </div>
 
+      <table mat-table [dataSource]="tasks" *ngIf="!isLoading && tasks.length > 0">
+        <!-- Título -->
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef> Título </th>
-          <td mat-cell *matCellDef="let task"> {{ task.title }} </td>
+          <td mat-cell *matCellDef="let task">
+            <a [routerLink]="['/tasks', task.id]" class="task-title">
+              {{ task.title }}
+            </a>
+            <div class="task-meta" *ngIf="task.username">
+              <small>Criado por: {{ task.username }}</small>
+            </div>
+          </td>
         </ng-container>
 
+        <!-- Responsável -->
         <ng-container matColumnDef="responsible">
           <th mat-header-cell *matHeaderCellDef> Responsável </th>
           <td mat-cell *matCellDef="let task"> {{ task.responsible }} </td>
         </ng-container>
 
+        <!-- Prioridade -->
         <ng-container matColumnDef="priority">
           <th mat-header-cell *matHeaderCellDef> Prioridade </th>
           <td mat-cell *matCellDef="let task">
-            <span [class]="'priority-badge ' + task.priority.toLowerCase()">
+            <mat-chip [color]="getPriorityColor(task.priority)" selected>
               {{ task.priority }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let task">
+            <mat-chip [color]="getStatusColor(task.status)" selected>
+              {{ task.status }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Prazo -->
+        <ng-container matColumnDef="deadline">
+          <th mat-header-cell *matHeaderCellDef> Prazo </th>
+          <td mat-cell *matCellDef="let task">
+            <span [class.overdue]="isOverdue(task)">
+              {{ formatDate(task.deadline) }}
             </span>
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="deadline">
-          <th mat-header-cell *matHeaderCellDef> Deadline </th>
-          <td mat-cell *matCellDef="let task"> {{ task.deadline | date:'dd/MM/yyyy' }} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef> Situação </th>
-          <td mat-cell *matCellDef="let task"> {{ task.status }} </td>
-        </ng-container>
-
+        <!-- Ações -->
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef> Ações </th>
           <td mat-cell *matCellDef="let task">
-            <button mat-icon-button color="primary" [routerLink]="['/tasks', task.id]">
-              <mat-icon>edit</mat-icon>
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="deleteTask(task.id!)">
-              <mat-icon>delete</mat-icon>
-            </button>
-            <button mat-icon-button color="accent" *ngIf="task.status !== 'Concluída'"
-                    (click)="completeTask(task.id!)">
-              <mat-icon>check_circle</mat-icon>
-            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item [routerLink]="['/tasks', task.id]">
+                <mat-icon>visibility</mat-icon>
+                Ver Detalhes
+              </button>
+              <button mat-menu-item [routerLink]="['/tasks', task.id, 'edit']"
+                      *ngIf="isAdmin || task.username === currentUser">
+                <mat-icon>edit</mat-icon>
+                Editar
+              </button>
+              <button mat-menu-item (click)="completeTask(task.id!)"
+                      *ngIf="task.status !== 'DONE'">
+                <mat-icon>check_circle</mat-icon>
+                Concluir
+              </button>
+              <button mat-menu-item (click)="deleteTask(task.id!)"
+                      *ngIf="isAdmin || task.username === currentUser" color="warn">
+                <mat-icon>delete</mat-icon>
+                Excluir
+              </button>
+            </mat-menu>
           </td>
         </ng-container>
 

@@ -1,214 +1,92 @@
-.form-container {
-  padding: 24px;
-  max-width: 900px;
+// src/app/modules/task/task-form/task-form.component.scss
+.task-form-container {
+  padding: 20px;
+  max-width: 800px;
   margin: 0 auto;
-}
 
-.header-actions {
-  margin-bottom: 24px;
-
-  .back-button {
-    color: #666;
-
-    mat-icon {
-      margin-right: 8px;
-      font-size: 20px;
-      height: 20px;
-      width: 20px;
-    }
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
+  h2 {
+    margin-bottom: 20px;
+    color: #3f51b5;
+    font-weight: 500;
   }
-}
-
-.form-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-
-  mat-card-header {
-    background: linear-gradient(135deg, #3f51b5 0%, #2196f3 100%);
-    color: white;
-    padding: 24px;
-    margin-bottom: 16px;
-
-    .form-icon {
-      margin-right: 12px;
-      vertical-align: middle;
-      font-size: 28px;
-      height: 28px;
-      width: 28px;
-    }
-
-    mat-card-title {
-      font-size: 24px;
-      font-weight: 500;
-      margin: 0;
-      display: flex;
-      align-items: center;
-    }
-
-    mat-card-subtitle {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 14px;
-      margin-top: 4px;
-    }
-  }
-}
-
-.form-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 0 16px;
 }
 
 .full-width {
   width: 100%;
+  margin-bottom: 16px;
+}
+
+.half-width {
+  width: calc(50% - 8px);
 }
 
 .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+
+    .half-width {
+      width: 100%;
+    }
   }
 }
 
-.form-field {
-  width: 100%;
+mat-card {
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 0 0 0;
+  margin-bottom: 0;
+
+  button {
+    min-width: 100px;
+  }
+}
+
+.button-spinner {
+  display: inline-block;
+  margin: 0 8px;
 }
 
 mat-form-field {
   margin-bottom: 8px;
 
-  &.mat-form-field-appearance-outline {
-    .mat-form-field-outline {
-      background-color: white;
-      border-radius: 8px;
-    }
-
-    .mat-form-field-wrapper {
-      padding-bottom: 0;
-    }
-
-    .mat-form-field-flex {
-      background-color: white;
-      padding: 0 12px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-  }
-
   mat-icon[matSuffix] {
-    color: #666;
-    margin-left: 8px;
-  }
-
-  mat-hint {
-    font-size: 12px;
-    color: #666;
+    color: rgba(0, 0, 0, 0.54);
   }
 }
 
-.priority-option, .status-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  mat-icon {
-    font-size: 18px;
-
-    &.priority-high {
-      color: #f44336;
-    }
-
-    &.priority-medium {
-      color: #ff9800;
-    }
-
-    &.priority-low {
-      color: #4caf50;
-    }
-
-    &.status-in_progress {
-      color: #2196f3;
-    }
-
-    &.status-completed {
-      color: #4caf50;
-    }
-  }
+mat-error {
+  font-size: 12px;
 }
 
-.task-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-field {
-  width: 100%;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-  padding: 24px 16px 16px;
-  border-top: 1px solid #eee;
-  margin-top: 16px;
-
-  .cancel-button {
-    color: #666;
-
-    mat-icon {
-      margin-right: 8px;
-    }
-  }
-
-  .submit-button {
-    padding: 8px 24px;
-    font-weight: 500;
-
-    mat-icon {
-      margin-right: 8px;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
+textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
 // Estilos para validação
-mat-error {
-  font-size: 12px;
-  margin-top: 4px;
-}
+.ng-invalid.ng-touched {
+  mat-form-field {
+    .mat-form-field-outline {
+      color: #f44336;
+    }
 
-// Ajustes do datepicker
-.mat-datepicker-toggle {
-  color: #666;
-}
-
-// Responsividade
-@media (max-width: 600px) {
-  .form-container {
-    padding: 16px;
-  }
-
-  .form-actions {
-    flex-direction: column;
-
-    button {
-      width: 100%;
-      justify-content: center;
+    .mat-form-field-label {
+      color: #f44336;
     }
   }
 }
