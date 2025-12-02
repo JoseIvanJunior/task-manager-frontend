@@ -1,43 +1,50 @@
 <!-- src/app/modules/task/task-detail/task-detail.component.html -->
 <div class="task-detail-container">
   <!-- Botão Voltar -->
-  <div class="back-nav">
-    <button mat-button (click)="goBack()" class="back-button">
-      <mat-icon>arrow_back</mat-icon>
+  <nav class="back-nav" aria-label="Navegação de retorno">
+    <button mat-button (click)="goBack()" class="back-button" aria-label="Voltar para lista de tarefas">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
       Voltar para Lista
     </button>
-  </div>
+  </nav>
 
   <!-- Loading -->
-  <div class="loading-container" *ngIf="isLoading">
-    <mat-spinner diameter="50"></mat-spinner>
+  <div class="loading-container" *ngIf="isLoading" aria-live="polite" aria-busy="true">
+    <mat-spinner diameter="50" aria-label="Carregando tarefa"></mat-spinner>
     <p>Carregando tarefa...</p>
   </div>
 
   <!-- Detalhes da Tarefa -->
-  <div *ngIf="!isLoading && task" class="task-content">
+  <section *ngIf="!isLoading && task" class="task-content" aria-labelledby="task-title">
     <mat-card>
       <!-- Cabeçalho com ações -->
       <mat-card-header>
         <div class="card-header-content">
           <div>
-            <mat-card-title>{{ task.title }}</mat-card-title>
-            <mat-card-subtitle *ngIf="task.username">
-              Criado por: {{ task.username }}
+            <mat-card-title id="task-title">{{ task.title }}</mat-card-title>
+            <mat-card-subtitle *ngIf="task.createdBy">
+              <mat-icon aria-hidden="true" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">person</mat-icon>
+              Criado por: {{ getTaskUser() }}
+              <span *ngIf="getTaskRole()" style="margin-left: 8px; color: #666; font-size: 12px;">
+                ({{ getTaskRole() }})
+              </span>
             </mat-card-subtitle>
           </div>
 
           <div class="card-actions">
-            <button mat-raised-button color="primary" (click)="editTask()" class="edit-button" *ngIf="canEdit()">
-              <mat-icon>edit</mat-icon>
+            <button mat-raised-button color="primary" (click)="editTask()" class="edit-button" *ngIf="canEdit()"
+                    aria-label="Editar tarefa" [disabled]="isLoading">
+              <mat-icon aria-hidden="true">edit</mat-icon>
               Editar
             </button>
-            <button mat-raised-button color="accent" (click)="completeTask()" class="complete-button" *ngIf="task.status !== 'DONE'">
-              <mat-icon>check_circle</mat-icon>
+            <button mat-raised-button color="accent" (click)="completeTask()" class="complete-button"
+                    *ngIf="canComplete() && !isTaskCompleted()" aria-label="Concluir tarefa" [disabled]="isLoading">
+              <mat-icon aria-hidden="true">check_circle</mat-icon>
               Concluir
             </button>
-            <button mat-raised-button color="warn" (click)="deleteTask()" class="delete-button" *ngIf="canEdit()">
-              <mat-icon>delete</mat-icon>
+            <button mat-raised-button color="warn" (click)="deleteTask()" class="delete-button" *ngIf="canDelete()"
+                    aria-label="Excluir tarefa" [disabled]="isLoading">
+              <mat-icon aria-hidden="true">delete</mat-icon>
               Excluir
             </button>
           </div>
@@ -47,15 +54,21 @@
       <mat-divider></mat-divider>
 
       <mat-card-content>
-        <!-- Status e Prioridade -->
+        <!-- CORREÇÃO: Status e Prioridade com melhor visualização -->
         <div class="status-priority-row">
-          <mat-chip [color]="getStatusColor(task.status)" selected class="status-chip">
-            <mat-icon>{{ getStatusIcon(task.status) }}</mat-icon>
+          <mat-chip [color]="getStatusColor(task.status)" 
+                    [class]="'status-chip ' + getStatusColor(task.status)"
+                    selected
+                    [attr.aria-label]="'Status: ' + getStatusDisplay(task.status)">
+            <mat-icon aria-hidden="true">{{ getStatusIcon(task.status) }}</mat-icon>
             {{ getStatusDisplay(task.status) }}
           </mat-chip>
 
-          <mat-chip [color]="getPriorityColor(task.priority)" selected class="priority-chip">
-            <mat-icon>{{ getPriorityIcon(task.priority) }}</mat-icon>
+          <mat-chip [color]="getPriorityColor(task.priority)" 
+                    [class]="'priority-chip ' + getPriorityColor(task.priority)"
+                    selected
+                    [attr.aria-label]="'Prioridade: ' + getPriorityDisplay(task.priority)">
+            <mat-icon aria-hidden="true">{{ getPriorityIcon(task.priority) }}</mat-icon>
             {{ getPriorityDisplay(task.priority) }}
           </mat-chip>
         </div>
@@ -63,42 +76,42 @@
         <!-- Descrição -->
         <div class="description-section" *ngIf="task.description">
           <h3>Descrição</h3>
-          <p>{{ task.description }}</p>
+          <p class="task-description">{{ task.description }}</p>
         </div>
 
         <!-- Informações da Tarefa -->
         <div class="task-info-grid">
           <div class="info-item">
-            <mat-icon class="info-icon">person</mat-icon>
+            <mat-icon class="info-icon" aria-hidden="true">assignment_ind</mat-icon>
             <div class="info-content">
               <span class="info-label">Responsável</span>
-              <span class="info-value">{{ task.responsible }}</span>
+              <span class="info-value">{{ task.responsible || 'Não definido' }}</span>
             </div>
           </div>
 
           <div class="info-item">
-            <mat-icon class="info-icon">calendar_today</mat-icon>
+            <mat-icon class="info-icon" aria-hidden="true">event</mat-icon>
             <div class="info-content">
               <span class="info-label">Prazo</span>
               <span class="info-value" [class.deadline-passed]="isDeadlinePassed(task.deadline)">
-                {{ formatDate(task.deadline) }}
-                <span *ngIf="isDeadlinePassed(task.deadline)" class="deadline-warning">
+                {{ formatSimpleDate(task.deadline) }}
+                <span *ngIf="isDeadlinePassed(task.deadline)" class="deadline-warning" aria-label="Prazo atrasado">
                   (Atrasado)
                 </span>
               </span>
             </div>
           </div>
 
-          <div class="info-item">
-            <mat-icon class="info-icon">person_add</mat-icon>
+          <div class="info-item" *ngIf="task.createdBy">
+            <mat-icon class="info-icon" aria-hidden="true">person_add</mat-icon>
             <div class="info-content">
               <span class="info-label">Criado por</span>
-              <span class="info-value">{{ task.username || 'Usuário' }}</span>
+              <span class="info-value">{{ getTaskUser() }}</span>
             </div>
           </div>
 
           <div class="info-item" *ngIf="task.createdAt">
-            <mat-icon class="info-icon">schedule</mat-icon>
+            <mat-icon class="info-icon" aria-hidden="true">schedule</mat-icon>
             <div class="info-content">
               <span class="info-label">Criado em</span>
               <span class="info-value">{{ formatDate(task.createdAt) }}</span>
@@ -106,7 +119,7 @@
           </div>
 
           <div class="info-item" *ngIf="task.updatedAt">
-            <mat-icon class="info-icon">update</mat-icon>
+            <mat-icon class="info-icon" aria-hidden="true">update</mat-icon>
             <div class="info-content">
               <span class="info-label">Atualizado em</span>
               <span class="info-value">{{ formatDate(task.updatedAt) }}</span>
@@ -117,28 +130,28 @@
 
       <!-- Rodapé com ações adicionais -->
       <mat-card-actions>
-        <button mat-button (click)="goBack()">
-          <mat-icon>list</mat-icon>
+        <button mat-button (click)="goBack()" aria-label="Ver todas as tarefas" [disabled]="isLoading">
+          <mat-icon aria-hidden="true">list</mat-icon>
           Ver Todas as Tarefas
         </button>
-        <button mat-button (click)="editTask()" *ngIf="canEdit()">
-          <mat-icon>edit</mat-icon>
+        <button mat-button (click)="editTask()" *ngIf="canEdit()" aria-label="Editar tarefa" [disabled]="isLoading">
+          <mat-icon aria-hidden="true">edit</mat-icon>
           Editar Tarefa
         </button>
-        <button mat-button (click)="completeTask()" *ngIf="task.status !== 'DONE'">
-          <mat-icon>check_circle</mat-icon>
+        <button mat-button (click)="completeTask()" *ngIf="canComplete() && !isTaskCompleted()" aria-label="Marcar como concluída" [disabled]="isLoading">
+          <mat-icon aria-hidden="true">check_circle</mat-icon>
           Marcar como Concluída
         </button>
       </mat-card-actions>
     </mat-card>
-  </div>
+  </section>
 
   <!-- Mensagem de erro se não encontrar tarefa -->
-  <div *ngIf="!isLoading && !task" class="error-message">
-    <mat-icon>error_outline</mat-icon>
+  <div *ngIf="!isLoading && !task" class="error-message" role="alert">
+    <mat-icon aria-hidden="true">error_outline</mat-icon>
     <h3>Tarefa não encontrada</h3>
     <p>A tarefa que você está procurando não existe ou foi removida.</p>
-    <button mat-raised-button color="primary" (click)="goBack()">
+    <button mat-raised-button color="primary" (click)="goBack()" aria-label="Voltar para lista de tarefas">
       Voltar para Lista de Tarefas
     </button>
   </div>

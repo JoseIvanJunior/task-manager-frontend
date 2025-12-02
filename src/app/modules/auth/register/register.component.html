@@ -9,7 +9,7 @@
     </mat-card-header>
 
     <mat-card-content>
-      <form (ngSubmit)="register()" (keydown)="onKeyPress($event)">
+      <form (ngSubmit)="register()" (keydown)="onKeyPress($event)" autocomplete="off" #registerForm="ngForm">
         <!-- Usuário -->
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Usuário</mat-label>
@@ -22,11 +22,15 @@
             placeholder="Digite um nome de usuário"
             minlength="3"
             maxlength="20"
-            autocomplete="username">
+            autocomplete="username"
+            #usernameInput="ngModel">
           <mat-icon matSuffix>person</mat-icon>
-          <mat-hint>Mínimo 3 caracteres</mat-hint>
-          <mat-error *ngIf="username && username.length < 3">
-            Usuário muito curto
+          <mat-hint align="start">Mínimo 3 caracteres</mat-hint>
+          <mat-error *ngIf="usernameInput.hasError('required') && usernameInput.touched">
+            Usuário é obrigatório
+          </mat-error>
+          <mat-error *ngIf="usernameInput.hasError('minlength') && usernameInput.touched">
+            Usuário muito curto (mínimo 3 caracteres)
           </mat-error>
         </mat-form-field>
 
@@ -42,11 +46,15 @@
             [disabled]="isLoading"
             placeholder="Digite uma senha"
             minlength="6"
-            autocomplete="new-password">
+            autocomplete="new-password"
+            #passwordInput="ngModel">
           <mat-icon matSuffix>lock</mat-icon>
-          <mat-hint>Mínimo 6 caracteres</mat-hint>
-          <mat-error *ngIf="password && password.length < 6">
-            Senha muito curta
+          <mat-hint align="start">Mínimo 6 caracteres</mat-hint>
+          <mat-error *ngIf="passwordInput.hasError('required') && passwordInput.touched">
+            Senha é obrigatória
+          </mat-error>
+          <mat-error *ngIf="passwordInput.hasError('minlength') && passwordInput.touched">
+            Senha muito curta (mínimo 6 caracteres)
           </mat-error>
         </mat-form-field>
 
@@ -61,9 +69,13 @@
             required
             [disabled]="isLoading"
             placeholder="Confirme sua senha"
-            autocomplete="new-password">
+            autocomplete="new-password"
+            #confirmPasswordInput="ngModel">
           <mat-icon matSuffix>lock</mat-icon>
-          <mat-error *ngIf="confirmPassword && password !== confirmPassword">
+          <mat-error *ngIf="confirmPasswordInput.touched && confirmPasswordInput.hasError('required')">
+            Confirmação de senha é obrigatória
+          </mat-error>
+          <mat-error *ngIf="password && confirmPassword && password !== confirmPassword && confirmPasswordInput.touched">
             As senhas não coincidem
           </mat-error>
         </mat-form-field>
@@ -74,7 +86,7 @@
           color="primary"
           type="submit"
           class="submit-button"
-          [disabled]="isLoading || !username || !password || !confirmPassword || password !== confirmPassword">
+          [disabled]="isLoading || registerForm.invalid || (password && confirmPassword && password !== confirmPassword)">
           <span *ngIf="isLoading">
             <mat-spinner diameter="20" class="spinner"></mat-spinner>
             Cadastrando...
@@ -88,20 +100,8 @@
         <!-- Mensagem de erro -->
         <div *ngIf="errorMessage" class="error-message">
           <mat-icon>error_outline</mat-icon>
-          {{ errorMessage }}
+          <span>{{ errorMessage }}</span>
         </div>
-
-        <!-- Botão de teste -->
-        <button
-          mat-stroked-button
-          color="accent"
-          type="button"
-          class="test-user-button"
-          (click)="registerAsTestUser()"
-          [disabled]="isLoading">
-          <mat-icon>play_arrow</mat-icon>
-          Criar Usuário de Teste
-        </button>
 
         <!-- Link para login -->
         <div class="login-link">

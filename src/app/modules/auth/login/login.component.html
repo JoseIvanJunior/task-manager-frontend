@@ -1,13 +1,7 @@
-<!-- src/app/features/auth/login/login.component.html -->
 <div class="login-container">
   <mat-card class="login-card">
     <mat-card-header>
       <mat-card-title>Login</mat-card-title>
-      <mat-card-subtitle>
-        Acesse sua conta para gerenciar suas tarefas
-        <br>
-        <small *ngIf="!isLoading">Para desenvolvimento: "usuario_teste" / "senha123"</small>
-      </mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
@@ -69,18 +63,6 @@
           <mat-icon>error_outline</mat-icon>
           {{ errorMessage }}
         </div>
-
-        <!-- Botão de teste -->
-        <button
-          mat-stroked-button
-          color="accent"
-          type="button"
-          class="test-user-button"
-          (click)="loginAsTestUser()"
-          [disabled]="isLoading">
-          <mat-icon>play_arrow</mat-icon>
-          Entrar como Usuário de Teste
-        </button>
 
         <!-- Link para registro -->
         <div class="register-link">

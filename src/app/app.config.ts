@@ -3,22 +3,20 @@ import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideNativeDateAdapter } from '@angular/material/core';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-
 import { routes } from './app.routes';
+import { authInterceptor } from '../app/core/interceptors/auth.interceptor.functional'; // Mudar para functional
 
-import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
-import { errorInterceptor } from './core/interceptors/error.interceptor';
+// Se você realmente precisa do NgRx (remova se não estiver usando)
+// import { provideStore } from '@ngrx/store';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(
-      withInterceptors([jwtInterceptor, errorInterceptor])
+      withInterceptors([authInterceptor]) // Usar interceptor funcional
     ),
-    provideAnimations(),
-    provideNativeDateAdapter(),
-    importProvidersFrom(MatSnackBarModule)
+    provideAnimations()
+    // Se estiver usando NgRx, descomente:
+    // provideStore({})
   ]
 };

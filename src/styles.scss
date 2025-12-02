@@ -1,6 +1,6 @@
 // src/styles.scss
 
-// Import do tema do Material - IMPORTANTE: usar o tema correto
+// Import do tema do Material
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 // Import das fontes
@@ -15,35 +15,50 @@
 }
 
 html, body {
+  margin: 0;
+  padding: 0;
   height: 100%;
   width: 100%;
-  overflow-x: hidden;
+  //overflow: hidden; /* Isso remove a barra do navegador globalmente */
 }
 
 body {
   font-family: 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #333;
   line-height: 1.6;
-  margin: 0 !important;
-  padding: 0 !important;
-  position: relative !important;
+  margin: 0;
+  padding: 0;
+  position: relative;
 }
 
 /* ====== REMOVE TODOS OS OVERLAYS ESCUROS ====== */
-body::before,
-body::after {
-  display: none !important;
+/* Remove backdrops de diálogos e menus */
+body .cdk-overlay-dark-backdrop {
+  background: transparent !important;
+  opacity: 0 !important;
 }
 
 .cdk-overlay-backdrop {
-  background-color: transparent !important;
+  background: transparent !important;
   opacity: 0 !important;
-  pointer-events: none !important;
+  visibility: hidden !important;
 }
 
-.cdk-overlay-container {
+.mat-drawer-backdrop {
+  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Para garantir que não apareça o backdrop em diálogos */
+.mat-dialog-container {
+  position: relative;
   z-index: 1000;
+}
+
+/* Remove qualquer efeito de overlay */
+.cdk-overlay-container {
   pointer-events: none;
 }
 
@@ -51,22 +66,11 @@ body::after {
   pointer-events: auto;
 }
 
-.mat-drawer-backdrop {
-  background-color: transparent !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Remove qualquer modal/dialog que possa estar bloqueando */
-.mat-dialog-container {
-  position: relative;
-  z-index: 1001;
-}
-
-/* Garante que o conteúdo principal esteja sempre visível */
-.app-root {
-  position: relative;
-  z-index: 1;
+/* Remove shadows que podem criar efeito escuro */
+.mat-elevation-z8,
+.mat-elevation-z6,
+.mat-elevation-z4 {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Scrollbar personalizada */
@@ -100,9 +104,58 @@ body::after {
   width: 100%;
 }
 
-/* Remove qualquer sombra que possa estar causando o efeito escuro */
-.mat-elevation-z8,
-.mat-elevation-z6,
-.mat-elevation-z4 {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+/* Container principal da aplicação */
+.app-root {
+  position: relative;
+  z-index: 1;
+}
+
+/* ====== GARANTE QUE NÃO HÁ OVERLAY ESCURO ====== */
+/* Adiciona estas regras para matar qualquer backdrop */
+body::before,
+body::after,
+html::before,
+html::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Remove qualquer overlay do Angular Material */
+.mat-drawer-transition .mat-drawer-backdrop,
+.cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
+  opacity: 0 !important;
+  background: transparent !important;
+}
+
+/* Se estiver usando dialogs, também remove o backdrop */
+.mat-dialog-backdrop {
+  display: none !important;
+}
+
+/* ====== ADICIONE ESTAS REGRAS ESPECÍFICAS ====== */
+/* Remove o backdrop do snackbar se estiver usando */
+.mat-snack-bar-container {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Garante que o conteúdo fique sempre visível */
+app-root {
+  display: block;
+  position: relative;
+  z-index: 10;
+}
+
+/* Remove qualquer camada de overlay que possa estar bloqueando */
+.cdk-global-overlay-wrapper {
+  pointer-events: none;
+}
+
+.cdk-overlay-connected-position-bounding-box {
+  pointer-events: auto;
+}
+
+/* Se ainda estiver com problema, force o body a não ter overlay */
+body.cdk-global-scrollblock {
+  overflow: visible !important;
+  position: static !important;
 }

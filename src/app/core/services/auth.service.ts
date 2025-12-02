@@ -2,156 +2,160 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
-import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { User } from '../models/task.model';
 
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface LoginResponse {
+interface LoginResponse {
   token: string;
   tokenType: string;
   role: string;
+  userId?: number;
+  id?: number;
+  username?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/auth`; // CORRIGIDO: usa environment.apiUrl
-  private tokenKey = 'auth_token';
-  private currentUserSubject = new BehaviorSubject<string | null>(null);
+  private apiUrl = `${environment.apiUrl}/auth`;
 
-  currentUser$ = this.currentUserSubject.asObservable();
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
-    console.log('AuthService inicializado. API URL:', this.apiUrl);
-
-    const token = this.getToken();
-    if (token) {
-      const username = this.getUsernameFromToken(token);
-      this.currentUserSubject.next(username);
-    }
+  constructor(private http: HttpClient) {
+    this.loadCurrentUser();
   }
 
-  login(credentials: LoginRequest): Observable<LoginResponse> {
-    console.log('Tentando login em:', `${this.apiUrl}/login`);
-    console.log('Credenciais:', credentials);
-
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
-      .pipe(
-        tap({
-          next: (response) => {
-            console.log('Login bem-sucedido:', response);
-            this.setToken(response.token);
-            const username = this.getUsernameFromToken(response.token);
-            this.currentUserSubject.next(username);
-          },
-          error: (error) => {
-            console.error('Erro no login:', error);
+  login(credentials: { username: string; password: string }): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
+      tap(response => {
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('role', response.role);
+          localStorage.setItem('username', credentials.username);
+          
+          // Tentar obter userId da resposta ou do token
+          let userId = response.userId || response.id;
+          
+          if (!userId && response.token) {
+            try {
+              const payload = JSON.parse(atob(response.token.split('.')[1]));
+              userId = payload.userId || payload.id || parseInt(payload.sub);
+            } catch (e) {
+              console.warn('Não foi possível extrair userId do token:', e);
+            }
           }
-        })
-      );
+          
+          if (userId) {
+            localStorage.setItem('userId', userId.toString());
+          }
+
+          const user: User = {
+            username: credentials.username,
+            role: response.role as 'ROLE_USER' | 'ROLE_ADMIN'
+          };
+
+          if (userId) {
+            user.id = userId;
+          }
+
+          this.currentUserSubject.next(user);
+        }
+      })
+    );
   }
 
-  register(credentials: LoginRequest): Observable<LoginResponse> {
-    console.log('Tentando registro em:', `${this.apiUrl}/register`);
-    return this.http.post<LoginResponse>(`${this.apiUrl}/register`, credentials)
-      .pipe(
-        tap(response => {
-          console.log('Registro bem-sucedido:', response);
-          this.setToken(response.token);
-          const username = this.getUsernameFromToken(response.token);
-          this.currentUserSubject.next(username);
-        })
-      );
-  }
-
-  createAdmin(credentials: LoginRequest): Observable<any> {
-    console.log('Criando admin em:', `${this.apiUrl}/create-admin`);
-    return this.http.post(`${this.apiUrl}/create-admin`, credentials);
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
-  getUsername(): string | null {
-    return this.currentUserSubject.value;
-  }
-
-  setToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
-  }
-
-  removeToken(): void {
-    localStorage.removeItem(this.tokenKey);
-    this.currentUserSubject.next(null);
-  }
-
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    return !!token && !this.isTokenExpired(token);
-  }
-
-  getCurrentUser(): string | null {
-    return this.currentUserSubject.value;
-  }
-
-  getUserRole(): string | null {
-    const token = this.getToken();
-    if (!token) return null;
-
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role || null;
-    } catch {
-      return null;
-    }
-  }
-
-  isAdmin(): boolean {
-    const role = this.getUserRole();
-    return role === 'ROLE_ADMIN';
+  register(credentials: { username: string; password: string }): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/register`, credentials);
   }
 
   logout(): void {
-    this.removeToken();
-    this.router.navigate(['/login']);
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userId');
+    this.currentUserSubject.next(null);
   }
 
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expirationDate = new Date(payload.exp * 1000);
-      return expirationDate <= new Date();
-    } catch {
-      return true;
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  getRole(): string | null {
+    return localStorage.getItem('role');
+  }
+
+  isAdmin(): boolean {
+    return this.getRole() === 'ROLE_ADMIN';
+  }
+
+  getCurrentUser(): User | null {
+    const username = localStorage.getItem('username');
+    const role = localStorage.getItem('role');
+    const userIdStr = localStorage.getItem('userId');
+
+    if (username && role) {
+      const user: User = {
+        username,
+        role: role as 'ROLE_USER' | 'ROLE_ADMIN'
+      };
+
+      if (userIdStr) {
+        user.id = parseInt(userIdStr, 10);
+      } else {
+        // Tentar obter do token como fallback
+        const token = this.getToken();
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const tokenUserId = payload.userId || payload.id || parseInt(payload.sub);
+            if (tokenUserId) {
+              user.id = tokenUserId;
+              localStorage.setItem('userId', tokenUserId.toString());
+            }
+          } catch (e) {
+            console.warn('Erro ao decodificar token:', e);
+          }
+        }
+      }
+
+      return user;
     }
+    return null;
   }
 
-  private getUsernameFromToken(token: string): string {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.sub || '';
-    } catch {
-      return '';
+  getCurrentUserId(): number | null {
+    const userIdStr = localStorage.getItem('userId');
+    if (userIdStr) {
+      return parseInt(userIdStr, 10);
     }
+    
+    const token = this.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userId = payload.userId || payload.id || parseInt(payload.sub);
+        if (userId) {
+          localStorage.setItem('userId', userId.toString());
+          return userId;
+        }
+      } catch (e) {
+        console.warn('Erro ao decodificar token:', e);
+      }
+    }
+    
+    return null;
   }
 
-  // Método para testar a conexão
-  testConnection(): Observable<any> {
-    console.log('Testando conexão com:', this.apiUrl);
-    return this.http.get(`${this.apiUrl}/health`).pipe(
-      tap({
-        next: (response) => console.log('Conexão OK:', response),
-        error: (error) => console.error('Erro na conexão:', error)
-      })
-    );
+  private loadCurrentUser(): void {
+    const user = this.getCurrentUser();
+    if (user) {
+      this.currentUserSubject.next(user);
+    }
   }
 }

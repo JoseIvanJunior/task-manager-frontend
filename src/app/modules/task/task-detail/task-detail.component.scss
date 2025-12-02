@@ -1,8 +1,86 @@
-// src/app/modules/task/task-detail/task-detail.component.scss
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden; // Garante que nada saia do componente
+}
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; // Mudado de 100vh para 100% do host
+  width: 100%;
+  padding: 20px;
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+  
+  // Isso remove a barra de rolagem visualmente mas mantém a função se precisar
+  overflow-y: auto; 
+  
+  /* Esconde a barra em navegadores baseados em Webkit (Chrome, Safari, Edge) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Esconde no Firefox e IE */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .task-detail-container {
   padding: 20px;
   max-width: 900px;
   margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* Cabeçalho superior com ícones */
+.task-header-icons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 15px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+
+  .icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: #666;
+    }
+
+    .heart-icon {
+      color: #e91e63; /* Cor rosa para o coração */
+    }
+
+    .chat-icon {
+      color: #2196f3; /* Cor azul para o chat */
+    }
+  }
+
+  .icon-label {
+    font-size: 12px;
+    color: #666;
+    margin-left: 4px;
+  }
 }
 
 .back-nav {
@@ -10,6 +88,7 @@
 
   .back-button {
     color: #666;
+    padding: 8px 16px;
 
     mat-icon {
       margin-right: 8px;
@@ -66,6 +145,7 @@
 .task-content {
   mat-card {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: visible; /* Garante que nada seja cortado */
   }
 }
 
@@ -78,15 +158,17 @@
   gap: 20px;
 
   mat-card-title {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 500;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     color: #333;
   }
 
   mat-card-subtitle {
     color: #666;
     font-size: 14px;
+    display: flex;
+    align-items: center;
   }
 }
 
@@ -102,64 +184,155 @@
   }
 }
 
+/* CORREÇÃO: Status e Prioridade com cores do tema */
 .status-priority-row {
   display: flex;
   gap: 15px;
   margin: 20px 0 30px 0;
   flex-wrap: wrap;
+  align-items: center;
 
   mat-chip {
     font-size: 14px;
     font-weight: 500;
-    padding: 8px 16px;
+    padding: 10px 20px !important;
+    height: auto !important;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
 
     mat-icon {
-      margin-right: 8px;
+      margin-right: 10px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
   }
 
   .status-chip {
     font-size: 15px;
+    font-weight: 600;
+    padding: 12px 22px !important;
+    min-height: 40px;
+    
+    /* Cores do tema para status */
+    &.status-primary {
+      background-color: #3f51b5 !important; /* Indigo 500 */
+      color: white !important;
+    }
+    
+    &.status-accent {
+      background-color: #ff4081 !important; /* Pink A200 */
+      color: white !important;
+    }
+    
+    &.status-warn {
+      background-color: #ff9800 !important; /* Orange 500 */
+      color: white !important;
+    }
+    
+    &.status-default {
+      background-color: #9e9e9e !important; /* Gray 500 */
+      color: white !important;
+    }
   }
 
   .priority-chip {
     font-size: 15px;
+    font-weight: 600;
+    padding: 12px 22px !important;
+    min-height: 40px;
+    
+    /* Cores do tema para prioridades */
+    &.priority-primary {
+      background-color: #4caf50 !important; /* Green 500 */
+      color: white !important;
+    }
+    
+    &.priority-accent {
+      background-color: #ff9800 !important; /* Orange 500 */
+      color: white !important;
+    }
+    
+    &.priority-warn {
+      background-color: #f44336 !important; /* Red 500 */
+      color: white !important;
+    }
+    
+    &.priority-default {
+      background-color: #9e9e9e !important; /* Gray 500 */
+      color: white !important;
+    }
   }
+}
+
+/* Cores padrão do Material Design para o projeto */
+:root {
+  --primary-color: #3f51b5;
+  --primary-light: #757de8;
+  --primary-dark: #002984;
+  
+  --accent-color: #ff4081;
+  --accent-light: #ff79b0;
+  --accent-dark: #c60055;
+  
+  --warn-color: #f44336;
+  --warn-light: #ff7961;
+  --warn-dark: #ba000d;
+  
+  --success-color: #4caf50;
+  --success-light: #80e27e;
+  --success-dark: #087f23;
+  
+  --info-color: #2196f3;
+  --info-light: #6ec6ff;
+  --info-dark: #0069c0;
 }
 
 .description-section {
   margin-bottom: 30px;
 
   h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 15px 0;
     color: #333;
     font-size: 18px;
     font-weight: 500;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
   }
 
   p {
     margin: 0;
     color: #555;
     line-height: 1.6;
-    font-size: 15px;
-    padding: 12px;
+    font-size: 16px;
+    padding: 16px;
     background-color: #f9f9f9;
-    border-radius: 4px;
-    border-left: 4px solid #3f51b5;
+    border-radius: 6px;
+    border: 1px solid #eee;
   }
 }
 
 .task-info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
   margin-bottom: 20px;
 }
 
 .info-item {
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 16px;
   background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -167,9 +340,9 @@
   .info-icon {
     margin-right: 15px;
     color: #3f51b5;
-    font-size: 24px;
-    height: 24px;
-    width: 24px;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
   }
 
   .info-content {
@@ -178,15 +351,16 @@
   }
 
   .info-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #6c757d;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 4px;
+    font-weight: 600;
   }
 
   .info-value {
-    font-size: 16px;
+    font-size: 15px;
     color: #333;
     font-weight: 500;
 
@@ -213,6 +387,7 @@ mat-card-actions {
   gap: 10px;
   padding: 16px;
   margin-bottom: 0;
+  border-top: 1px solid #eee;
 
   button {
     mat-icon {
@@ -221,17 +396,63 @@ mat-card-actions {
   }
 }
 
+/* Estilos específicos para a exibição da tarefa */
+.task-detail-container {
+  .mat-card {
+    .mat-card-header {
+      padding: 24px 24px 16px 24px;
+    }
+
+    .mat-card-content {
+      padding: 0 24px 24px 24px;
+    }
+
+    .mat-divider {
+      margin: 0 24px;
+    }
+  }
+}
+
+/* Responsividade */
 @media (max-width: 768px) {
   .task-detail-container {
     padding: 10px;
   }
 
+  .task-header-icons {
+    padding: 8px 0;
+    
+    .icon-button {
+      padding: 6px;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
   .card-header-content {
     flex-direction: column;
     align-items: stretch;
+    gap: 15px;
 
     .card-actions {
       justify-content: flex-start;
+    }
+  }
+
+  /* Ajuste dos chips em telas menores */
+  .status-priority-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    
+    mat-chip {
+      width: 100%;
+      justify-content: flex-start;
+      padding: 12px 16px !important;
     }
   }
 
@@ -247,4 +468,66 @@ mat-card-actions {
       justify-content: flex-start;
     }
   }
+
+  .task-detail-container {
+    .mat-card {
+      .mat-card-header {
+        padding: 16px 16px 12px 16px;
+      }
+
+      .mat-card-content {
+        padding: 0 16px 16px 16px;
+      }
+
+      .mat-divider {
+        margin: 0 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .task-header-icons {
+    gap: 12px;
+    
+    .icon-label {
+      display: none; /* Oculta labels em telas muito pequenas */
+    }
+  }
+
+  .card-header-content {
+    mat-card-title {
+      font-size: 24px;
+    }
+  }
+
+  /* Chips em telas muito pequenas */
+  .status-priority-row {
+    mat-chip {
+      font-size: 13px;
+      padding: 10px 14px !important;
+      
+      mat-icon {
+        font-size: 16px;
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+/* Garantir que nada seja cortado */
+:host {
+  display: block;
+  overflow: visible;
+}
+
+.mat-card {
+  overflow: visible !important;
+}
+
+/* Override do Material para garantir chips visíveis */
+.mat-chip {
+  line-height: 1.5 !important;
+  white-space: nowrap;
+  overflow: visible !important;
 }

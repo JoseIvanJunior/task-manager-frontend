@@ -1,4 +1,3 @@
-// src/app/features/auth/login/login.component.ts
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -44,43 +43,43 @@ export class LoginComponent {
     private cdr: ChangeDetectorRef
   ) {
     // Testa a conexão ao iniciar
-    this.testBackendConnection();
+    // this.testBackendConnection();
   }
 
-  private testBackendConnection(): void {
-    console.log('Testando conexão com backend...');
+  // private testBackendConnection(): void {
+  //   console.log('Testando conexão com backend...');
 
-    // Teste 1: Direto ao backend (deve falhar por CORS)
-    fetch('http://localhost:8081/api/auth/health')
-      .then(response => {
-        console.log('1. Backend direto (possível CORS):', response.status);
-      })
-      .catch(error => {
-        console.log('1. Backend direto - Erro esperado (CORS):', error.message);
-      });
+  //   // Teste 1: Direto ao backend (deve falhar por CORS)
+  //   fetch('http://localhost:8081/api/auth/health')
+  //     .then(response => {
+  //       console.log('1. Backend direto (possível CORS):', response.status);
+  //     })
+  //     .catch(error => {
+  //       console.log('1. Backend direto - Erro esperado (CORS):', error.message);
+  //     });
 
-    // Teste 2: Via proxy Angular
-    fetch('/api/actuator/health')
-      .then(response => {
-        console.log('2. Via proxy (Spring Actuator):', response.status);
-        if (response.ok) {
-          this.showSuccess('Backend conectado via proxy!');
-        }
-      })
-      .catch(error => {
-        console.error('2. Erro via proxy:', error);
-        this.showError('Proxy não configurado corretamente');
-      });
+  //   // Teste 2: Via proxy Angular
+  //   fetch('/api/actuator/health')
+  //     .then(response => {
+  //       console.log('2. Via proxy (Spring Actuator):', response.status);
+  //       if (response.ok) {
+  //         this.showSuccess('Backend conectado via proxy!');
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error('2. Erro via proxy:', error);
+  //       this.showError('Proxy não configurado corretamente');
+  //     });
 
-    // Teste 3: Sua API específica
-    fetch('/api/auth/health')
-      .then(response => {
-        console.log('3. API auth via proxy:', response.status);
-      })
-      .catch(error => {
-        console.error('3. Erro API auth:', error);
-      });
-  }
+  //   // Teste 3: Sua API específica
+  //   fetch('/api/auth/health')
+  //     .then(response => {
+  //       console.log('3. API auth via proxy:', response.status);
+  //     })
+  //     .catch(error => {
+  //       console.error('3. Erro API auth:', error);
+  //     });
+  // }
 
   login(): void {
     if (!this.username.trim() || !this.password.trim()) {
@@ -154,26 +153,26 @@ export class LoginComponent {
     this.login();
   }
 
-  testConnection(): void {
-    console.log('=== TESTE DE CONEXÃO ===');
-    console.log('AuthService API URL:', this.authService['apiUrl']);
-    //console.log('Environment API URL:', environment.apiUrl);
+  // testConnection(): void {
+  //   console.log('=== TESTE DE CONEXÃO ===');
+  //   console.log('AuthService API URL:', this.authService['apiUrl']);
+  //   //console.log('Environment API URL:', environment.apiUrl);
 
-    // Testa várias URLs
-    const testUrls = [
-      'http://localhost:8081/api/auth/login',
-      '/api/auth/login',
-      '/api/actuator/health',
-      'http://localhost:8081/actuator/health'
-    ];
+  //   // Testa várias URLs
+  //   const testUrls = [
+  //     'http://localhost:8081/api/auth/login',
+  //     '/api/auth/login',
+  //     '/api/actuator/health',
+  //     'http://localhost:8081/actuator/health'
+  //   ];
 
-    testUrls.forEach(url => {
-      console.log(`\nTestando: ${url}`);
-      fetch(url, { method: 'GET' })
-        .then(response => console.log(`${url}: ${response.status}`))
-        .catch(error => console.error(`${url}: ${error.message}`));
-    });
-  }
+  //   testUrls.forEach(url => {
+  //     console.log(`\nTestando: ${url}`);
+  //     fetch(url, { method: 'GET' })
+  //       .then(response => console.log(`${url}: ${response.status}`))
+  //       .catch(error => console.error(`${url}: ${error.message}`));
+  //   });
+  // }
 
   togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;

@@ -3,4 +3,9 @@ export interface User {
   username: string;
   password?: string;
   token?: string;
+  role: string;
+  email?: string;
+  name?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

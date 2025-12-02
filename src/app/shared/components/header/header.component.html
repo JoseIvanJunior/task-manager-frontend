@@ -1,91 +1,63 @@
 <!-- src/app/shared/components/header/header.component.html -->
-<mat-toolbar color="primary">
-  <div class="container">
-    <div class="left-section">
-      <button mat-icon-button [routerLink]="['/']" class="logo-button">
-        <mat-icon>checklist</mat-icon>
-      </button>
-      <span class="app-title">Task Manager</span>
-
-      <nav class="nav-links">
-        <button mat-button *ngIf="authService.isAuthenticated()" [routerLink]="['/tasks']">
-          Tarefas
-        </button>
-        <button mat-button *ngIf="authService.isAdmin()" [routerLink]="['/admin']">
-          Admin
-        </button>
-      </nav>
+<mat-toolbar color="primary" class="header-toolbar">
+  <div class="header-container">
+    <!-- Logo e Nome -->
+    <div class="logo-section" (click)="goToTasks()">
+      <mat-icon class="logo-icon">task_alt</mat-icon>
+      <span class="app-name">Task Manager</span>
     </div>
 
-    <div class="right-section">
-      <ng-container *ngIf="authService.isAuthenticated(); else notAuthenticated">
-        <button mat-button [matMenuTriggerFor]="userMenu">
-          <mat-icon>person</mat-icon>
-          {{ currentUser$ | async }}
+    <!-- Menu de Navegação -->
+    <div class="nav-section" *ngIf="isLoggedIn">
+      <button mat-button routerLink="/tasks" routerLinkActive="active">
+        <mat-icon>list_alt</mat-icon>
+        <span>Tarefas</span>
+      </button>
+      
+      <button mat-button routerLink="/tasks/new" routerLinkActive="active">
+        <mat-icon>add_task</mat-icon>
+        <span>Nova Tarefa</span>
+      </button>
+    </div>
+
+    <!-- Usuário e Menu -->
+    <div class="user-section">
+      <div *ngIf="isLoggedIn; else loginButtons">
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-btn">
+          <mat-icon class="user-icon">account_circle</mat-icon>
+          <span class="username">{{ username }}</span>
+          <mat-icon>arrow_drop_down</mat-icon>
         </button>
 
-        <mat-menu #userMenu="matMenu">
-          <button mat-menu-item (click)="goToProfile()">
-            <mat-icon>account_circle</mat-icon>
-            Meu Perfil
-          </button>
-          <button mat-menu-item (click)="goToTasks()">
-            <mat-icon>list_alt</mat-icon>
-            Minhas Tarefas
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <button mat-menu-item disabled>
+            <mat-icon>person</mat-icon>
+            <span>{{ username }}</span>
+            <span class="user-role" *ngIf="isAdmin">(Admin)</span>
           </button>
           <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon>
-            Sair
+          <button mat-menu-item routerLink="/profile">
+            <mat-icon>settings</mat-icon>
+            <span>Meu Perfil</span>
+          </button>
+          <button mat-menu-item *ngIf="isAdmin" routerLink="/admin">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Painel Admin</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()" class="logout-btn">
+            <mat-icon color="warn">exit_to_app</mat-icon>
+            <span>Sair</span>
           </button>
         </mat-menu>
-      </ng-container>
+      </div>
 
-      <ng-template #notAuthenticated>
-        <button mat-button [routerLink]="['/login']">
-          Login
-        </button>
-        <button mat-button [routerLink]="['/register']" color="accent">
-          Registrar
+      <ng-template #loginButtons>
+        <button mat-button (click)="goToLogin()" class="login-btn">
+          <mat-icon>login</mat-icon>
+          <span>Entrar</span>
         </button>
       </ng-template>
     </div>
   </div>
 </mat-toolbar>
-
-<style>
-  .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 0 16px;
-  }
-
-  .left-section {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .logo-button {
-    margin-right: 8px;
-  }
-
-  .app-title {
-    font-size: 1.2rem;
-    font-weight: 500;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 8px;
-    margin-left: 24px;
-  }
-
-  .right-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-</style>
